@@ -19,10 +19,8 @@
 use std::ops::Deref;
 use ethereum_types::{H256, H160, Address, U256};
 use error;
-use ethjson;
 use ethkey::{self, Signature, Secret, Public, recover, public_to_address};
 use hash::keccak;
-use heapsize::HeapSizeOf;
 use rlp::{self, RlpStream, Rlp, DecoderError, Encodable};
 
 type Bytes = Vec<u8>;
@@ -131,57 +129,6 @@ impl Transaction {
 	}
 }
 
-impl HeapSizeOf for Transaction {
-	fn heap_size_of_children(&self) -> usize {
-		self.data.heap_size_of_children()
-	}
-}
-
-impl From<ethjson::state::Transaction> for SignedTransaction {
-	fn from(t: ethjson::state::Transaction) -> Self {
-		let to: Option<ethjson::hash::Address> = t.to.into();
-		let secret = t.secret.map(|s| Secret::from(s.0));
-		let tx = Transaction {
-			nonce: t.nonce.into(),
-			gas_price: t.gas_price.into(),
-			gas: t.gas_limit.into(),
-			action: match to {
-				Some(to) => Action::Call(to.into()),
-				None => Action::Create
-			},
-			value: t.value.into(),
-			data: t.data.into(),
-		};
-		match secret {
-			Some(s) => tx.sign(&s, None),
-			None => tx.null_sign(1),
-		}
-	}
-}
-
-impl From<ethjson::transaction::Transaction> for UnverifiedTransaction {
-	fn from(t: ethjson::transaction::Transaction) -> Self {
-		let to: Option<ethjson::hash::Address> = t.to.into();
-		UnverifiedTransaction {
-			unsigned: Transaction {
-				nonce: t.nonce.into(),
-				gas_price: t.gas_price.into(),
-				gas: t.gas_limit.into(),
-				action: match to {
-					Some(to) => Action::Call(to.into()),
-					None => Action::Create
-				},
-				value: t.value.into(),
-				data: t.data.into(),
-			},
-			r: t.r.into(),
-			s: t.s.into(),
-			v: t.v.into(),
-			hash: 0.into(),
-		}.compute_hash()
-	}
-}
-
 impl Transaction {
 	/// The message hash of the transaction.
 	pub fn hash(&self, chain_id: Option<u64>) -> H256 {
@@ -266,12 +213,6 @@ pub struct UnverifiedTransaction {
 	s: U256,
 	/// Hash of the transaction
 	hash: H256,
-}
-
-impl HeapSizeOf for UnverifiedTransaction {
-	fn heap_size_of_children(&self) -> usize {
-		self.unsigned.heap_size_of_children()
-	}
 }
 
 impl Deref for UnverifiedTransaction {
@@ -424,12 +365,6 @@ pub struct SignedTransaction {
 	transaction: UnverifiedTransaction,
 	sender: Address,
 	public: Option<Public>,
-}
-
-impl HeapSizeOf for SignedTransaction {
-	fn heap_size_of_children(&self) -> usize {
-		self.transaction.heap_size_of_children()
-	}
 }
 
 impl rlp::Encodable for SignedTransaction {
