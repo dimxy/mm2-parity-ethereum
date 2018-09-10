@@ -6,6 +6,6 @@ description = "Trie-root helpers, ethereum style"
 license = "GPL-3.0"
 
 [dependencies]
-triehash = { git = "https://github.com/paritytech/parity-common" }
+triehash = { git = "https://github.com/paritytech/parity-common", rev = "0045887fecd2fec39e56c962a0b27e2caf3b9474" }
 ethereum-types = "0.3"
 keccak-hasher = { path = "../keccak-hasher" }
