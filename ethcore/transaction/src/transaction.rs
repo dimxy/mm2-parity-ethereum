@@ -203,16 +203,16 @@ impl Transaction {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct UnverifiedTransaction {
 	/// Plain Transaction.
-	unsigned: Transaction,
+	pub unsigned: Transaction,
 	/// The V field of the signature; the LS bit described which half of the curve our point falls
 	/// in. The MS bits describe which chain this transaction is for. If 27/28, its for all chains.
-	v: u64,
+	pub v: u64,
 	/// The R field of the signature; helps describe the point on the curve.
-	r: U256,
+	pub r: U256,
 	/// The S field of the signature; helps describe the point on the curve.
-	s: U256,
+	pub s: U256,
 	/// Hash of the transaction
-	hash: H256,
+	pub hash: H256,
 }
 
 impl Deref for UnverifiedTransaction {
@@ -362,9 +362,9 @@ impl UnverifiedTransaction {
 /// A `UnverifiedTransaction` with successfully recovered `sender`.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SignedTransaction {
-	transaction: UnverifiedTransaction,
-	sender: Address,
-	public: Option<Public>,
+	pub transaction: UnverifiedTransaction,
+	pub sender: Address,
+	pub public: Option<Public>,
 }
 
 impl rlp::Encodable for SignedTransaction {
