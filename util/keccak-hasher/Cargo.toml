@@ -6,7 +6,7 @@ description = "Keccak-256 implementation of the Hasher trait"
 license = "GPL-3.0"
 
 [dependencies]
-ethereum-types = "~0.3"
+ethereum-types = { version = "0.4", default-features = false, features = ["std", "serialize"] }
 tiny-keccak = "1.4.2"
-hashdb = { git = "https://github.com/paritytech/parity-common" }
-plain_hasher = { git = "https://github.com/paritytech/parity-common" }
+hashdb = { git = "https://github.com/artemii235/parity-common" }
+plain_hasher = { git = "https://github.com/artemii235/parity-common" }
