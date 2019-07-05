@@ -21,8 +21,6 @@ extern crate ethkey;
 extern crate keccak_hash as hash;
 extern crate rlp;
 extern crate unexpected;
-
-#[cfg(test)]
 extern crate rustc_hex;
 
 mod error;

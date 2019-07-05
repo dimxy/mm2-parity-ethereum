@@ -20,9 +20,6 @@ extern crate byteorder;
 extern crate edit_distance;
 extern crate ethereum_types;
 extern crate mem;
-extern crate parity_wordlist;
-#[macro_use]
-extern crate quick_error;
 extern crate rand;
 extern crate rustc_hex;
 extern crate secp256k1;
@@ -30,14 +27,10 @@ extern crate serde;
 extern crate tiny_keccak;
 
 #[macro_use]
-extern crate lazy_static;
-#[macro_use]
 extern crate log;
 #[macro_use]
 extern crate serde_derive;
 
-mod brain;
-mod brain_prefix;
 mod error;
 mod keypair;
 mod keccak;
@@ -47,29 +40,18 @@ mod random;
 mod signature;
 mod secret;
 
-pub mod brain_recover;
-pub mod math;
-
-pub use self::parity_wordlist::Error as WordlistError;
-pub use self::brain::Brain;
-pub use self::brain_prefix::BrainPrefix;
 pub use self::error::Error;
 pub use self::keypair::{KeyPair, public_to_address};
-pub use self::math::public_is_valid;
 pub use self::password::Password;
 pub use self::prefix::Prefix;
 pub use self::random::Random;
-pub use self::signature::{sign, verify_public, verify_address, recover, Signature};
+pub use self::signature::{recover, sign, Signature};
 pub use self::secret::Secret;
 
 use ethereum_types::H256;
 
 pub use ethereum_types::{Address, Public};
 pub type Message = H256;
-
-lazy_static! {
-	pub static ref SECP256K1: secp256k1::Secp256k1 = secp256k1::Secp256k1::new();
-}
 
 /// Uninstantiatable error type for infallible generators.
 #[derive(Debug)]

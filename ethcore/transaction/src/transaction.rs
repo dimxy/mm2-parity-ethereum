@@ -19,7 +19,7 @@
 use std::ops::Deref;
 use ethereum_types::{H256, H160, Address, U256};
 use error;
-use ethkey::{self, Signature, Secret, Public, recover, public_to_address};
+use ethkey::{self, recover, Signature, Secret, Public, public_to_address};
 use hash::keccak;
 use rlp::{self, RlpStream, Rlp, DecoderError, Encodable};
 
@@ -504,6 +504,7 @@ mod tests {
 	use super::*;
 	use ethereum_types::U256;
 	use hash::keccak;
+	use ethkey::KeyPair;
 
 	#[test]
 	fn sender_test() {
@@ -523,9 +524,7 @@ mod tests {
 
 	#[test]
 	fn signing() {
-		use ethkey::{Random, Generator};
-
-		let key = Random.generate().unwrap();
+		let key = KeyPair::from_secret_slice(&[128, 148, 101, 177, 125, 10, 77, 219, 62, 76, 105, 232, 242, 60, 44, 171, 173, 134, 143, 81, 248, 190, 213, 199, 101, 173, 29, 101, 22, 195, 48, 111]).unwrap();
 		let t = Transaction {
 			action: Action::Create,
 			nonce: U256::from(42),
@@ -558,8 +557,7 @@ mod tests {
 
 	#[test]
 	fn should_recover_from_chain_specific_signing() {
-		use ethkey::{Random, Generator};
-		let key = Random.generate().unwrap();
+		let key = KeyPair::from_secret_slice(&[128, 148, 101, 177, 125, 10, 77, 219, 62, 76, 105, 232, 242, 60, 44, 171, 173, 134, 143, 81, 248, 190, 213, 199, 101, 173, 29, 101, 22, 195, 48, 111]).unwrap();
 		let t = Transaction {
 			action: Action::Create,
 			nonce: U256::from(42),
