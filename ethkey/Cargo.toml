@@ -14,5 +14,18 @@ rand = "0.4"
 rustc-hex = "1.0"
 serde = "1.0"
 serde_derive = "1.0"
+# tiny-keccak 1.5.0 failed to build with
+#error[E0658]: imports can only refer to extern crate names passed with `--extern` on stable channel (see issue #53130)
+#   --> ~/.cargo/registry/src/github.com-1ecc6299db9ec823/tiny-keccak-1.5.0/src/lib.rs:114:9
+#    |
+#108 | mod keccak;
+#    | ----------- not an extern crate passed with `--extern`
+#...
+#114 | pub use keccak::*;
+#    |         ^^^^^^
+#    |
+#note: this import refers to the module defined here
+#   --> ~/.cargo/registry/src/github.com-1ecc6299db9ec823/tiny-keccak-1.5.0/src/lib.rs:108:1
+#    |
+#108 | mod keccak;
 tiny-keccak = "=1.4"
-
