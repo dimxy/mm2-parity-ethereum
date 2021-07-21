@@ -19,7 +19,7 @@ use std::ops::Deref;
 use std::str::FromStr;
 use rustc_hex::ToHex;
 use secp256k1::{SecretKey};
-use secp256k1::util::{SECRET_KEY_SIZE as SECP256K1_SECRET_KEY_SIZE};
+use secp256k1::constants::{SECRET_KEY_SIZE as SECP256K1_SECRET_KEY_SIZE};
 use ethereum_types::H256;
 use mem::Memzero;
 use {Error};
@@ -71,7 +71,7 @@ impl Secret {
 
 	/// Imports and validates the key.
 	pub fn from_unsafe_slice(key: &[u8]) -> Result<Self, Error> {
-		let secret = SecretKey::parse_slice(key)?;
+		let secret = SecretKey::from_slice(key)?;
 		Ok(secret.into())
 	}
 
@@ -82,7 +82,7 @@ impl Secret {
 
 	/// Create `secp256k1::key::SecretKey` based on this secret
 	pub fn to_secp256k1_secret(&self) -> Result<SecretKey, Error> {
-		Ok(SecretKey::parse_slice(&self[..])?)
+		Ok(SecretKey::from_slice(&self[..])?)
 	}
 }
 
@@ -114,7 +114,7 @@ impl From<&'static str> for Secret {
 impl From<SecretKey> for Secret {
 	fn from(key: SecretKey) -> Self {
 		let mut a = [0; SECP256K1_SECRET_KEY_SIZE];
-		a.copy_from_slice(&key.serialize()[0 .. SECP256K1_SECRET_KEY_SIZE]);
+		a.copy_from_slice(&key[0 .. SECP256K1_SECRET_KEY_SIZE]);
 		a.into()
 	}
 }

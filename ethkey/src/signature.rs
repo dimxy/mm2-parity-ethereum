@@ -19,7 +19,8 @@ use std::cmp::PartialEq;
 use std::fmt;
 use std::str::FromStr;
 use std::hash::{Hash, Hasher};
-use secp256k1::{Message as SecpMessage, RecoveryId, SecretKey, Signature as SecpSignature, recover as secp_recover,sign as secp_sign};
+use secp256k1::{Message as SecpMessage, SecretKey, Secp256k1};
+use secp256k1::recovery::{RecoverableSignature, RecoveryId};
 use rustc_hex::{ToHex, FromHex};
 use ethereum_types::{H520, H256};
 use {Address, Error, Message, Public, public_to_address, Secret};
@@ -188,13 +189,14 @@ impl DerefMut for Signature {
 }
 
 pub fn sign(secret: &Secret, message: &Message) -> Result<Signature, Error> {
-	let sec = SecretKey::parse_slice(&secret)?;
-	let (s, rec_id) = secp_sign(&SecpMessage::parse_slice(&message[..])?, &sec)?;
+	let msg = SecpMessage::from_slice(&message[..])?;
+	let sec = SecretKey::from_slice(&secret)?;
+	let (rec_id, s) = Secp256k1::signing_only().sign_recoverable(&msg, &sec).serialize_compact();
 	let mut data_arr = [0; 65];
 
 	// no need to check if s is low, it always is
-	data_arr[0..64].copy_from_slice(&s.serialize()[0..64]);
-	data_arr[64] = rec_id.into();
+	data_arr[0..64].copy_from_slice(&s);
+	data_arr[64] = rec_id.to_i32() as u8;
 	Ok(Signature(data_arr))
 }
 
@@ -205,9 +207,10 @@ pub fn verify_address(address: &Address, signature: &Signature, message: &Messag
 }
 
 pub fn recover(signature: &Signature, message: &Message) -> Result<Public, Error> {
-	let sig = SecpSignature::parse_slice(&signature[0..64])?;
-	let pubkey = secp_recover(&SecpMessage::parse_slice(&message[..])?, &sig, &RecoveryId::parse(signature[64])?)?;
-	let serialized = pubkey.serialize();
+	let recovery_id = RecoveryId::from_i32(signature[64] as i32)?;
+	let sig = RecoverableSignature::from_compact(&signature[0..64], recovery_id)?;
+	let pubkey = Secp256k1::new().recover(&SecpMessage::from_slice(&message[..])?, &sig)?;
+	let serialized = pubkey.serialize_uncompressed();
 
 	let mut public = Public::default();
 	public.copy_from_slice(&serialized[1..65]);

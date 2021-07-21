@@ -15,7 +15,7 @@
 // along with Parity.  If not, see <http://www.gnu.org/licenses/>.
 
 use std::fmt;
-use secp256k1::{PublicKey, SecretKey};
+use secp256k1::{PublicKey, SecretKey, Secp256k1};
 use rustc_hex::ToHex;
 use keccak::Keccak256;
 use super::{Secret, Public, Address, Error};
@@ -45,9 +45,9 @@ impl fmt::Display for KeyPair {
 impl KeyPair {
 	/// Create a pair from secret key
 	pub fn from_secret(secret: Secret) -> Result<KeyPair, Error> {
-		let s: SecretKey = SecretKey::parse_slice(&secret[..])?;
-		let pub_key = PublicKey::from_secret_key(&s);
-		let serialized = pub_key.serialize();
+		let s: SecretKey = SecretKey::from_slice(&secret[..])?;
+		let pub_key = PublicKey::from_secret_key(&Secp256k1::new(), &s);
+		let serialized = pub_key.serialize_uncompressed();
 
 		let mut public = Public::default();
 		public.copy_from_slice(&serialized[1..65]);
@@ -65,7 +65,7 @@ impl KeyPair {
 	}
 
 	pub fn from_keypair(sec: SecretKey, publ: PublicKey) -> Self {
-		let serialized = publ.serialize();
+		let serialized = publ.serialize_uncompressed();
 		let secret = Secret::from(sec);
 		let mut public = Public::default();
 		public.copy_from_slice(&serialized[1..65]);

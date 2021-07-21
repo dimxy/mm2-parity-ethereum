@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Parity.  If not, see <http://www.gnu.org/licenses/>.
 
-use rand::{thread_rng, ThreadRng};
-use secp256k1::{SecretKey, PublicKey};
+use rand::{thread_rng};
+use rand::rngs::ThreadRng;
+use secp256k1::{SecretKey, PublicKey, Secp256k1};
 use super::{Generator, KeyPair};
 
 /// Randomly generates new keypair, instantiating the RNG each time.
@@ -37,8 +38,8 @@ impl Generator for ThreadRng {
 	type Error = ::Void;
 
 	fn generate(&mut self) -> Result<KeyPair, Self::Error> {
-		let sec = SecretKey::random(self);
-		let publ = PublicKey::from_secret_key(&sec);
+		let sec = SecretKey::new(self);
+		let publ = PublicKey::from_secret_key(&Secp256k1::new(), &sec);
 
 		Ok(KeyPair::from_keypair(sec, publ))
 	}

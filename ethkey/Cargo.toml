@@ -6,11 +6,11 @@ authors = ["Parity Technologies <admin@parity.io>"]
 [dependencies]
 byteorder = "1.0"
 edit-distance = "2.0"
-libsecp256k1 = "0.2.2"
+secp256k1 = { version = "0.20", features = ["rand", "recovery"] }
 ethereum-types = { version = "0.4", default-features = false, features = ["std", "serialize"] }
 log = "0.3"
 mem = { path = "../util/mem" }
-rand = "0.4"
+rand = "0.6"
 rustc-hex = "1.0"
 serde = "1.0"
 serde_derive = "1.0"
