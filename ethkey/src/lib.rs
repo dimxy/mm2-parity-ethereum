@@ -43,7 +43,7 @@ pub use self::keypair::{KeyPair, public_to_address};
 pub use self::password::Password;
 pub use self::prefix::Prefix;
 pub use self::random::Random;
-pub use self::signature::{recover, sign, Signature};
+pub use self::signature::{recover, sign, verify_address, Signature};
 pub use self::secret::Secret;
 
 use ethereum_types::H256;
