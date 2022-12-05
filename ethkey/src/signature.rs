@@ -68,24 +68,27 @@ impl Signature {
 	/// Create a signature object from the sig.
 	pub fn from_rsv(r: &H256, s: &H256, v: u8) -> Self {
 		let mut sig = [0u8; 65];
-		sig[0..32].copy_from_slice(&r);
-		sig[32..64].copy_from_slice(&s);
+		sig[0..32].as_mut().copy_from_slice(r.as_bytes());
+		sig[32..64].as_mut().copy_from_slice(s.as_bytes());
 		sig[64] = v;
 		Signature(sig)
 	}
 
 	/// Check if this is a "low" signature.
 	pub fn is_low_s(&self) -> bool {
-		H256::from_slice(self.s()) <= "7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0".into()
+		let expected = H256::from_str("7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0").unwrap();
+		H256::from_slice(self.s()) <= expected
 	}
 
 	/// Check if each component of the signature is in range.
 	pub fn is_valid(&self) -> bool {
+		let expected = H256::from_str("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141").unwrap();
+		let one = H256::from_low_u64_ne(1);
 		self.v() <= 1 &&
-			H256::from_slice(self.r()) < "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141".into() &&
-			H256::from_slice(self.r()) >= 1.into() &&
-			H256::from_slice(self.s()) < "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141".into() &&
-			H256::from_slice(self.s()) >= 1.into()
+			H256::from_slice(self.r()) < expected &&
+			H256::from_slice(self.r()) >= one &&
+			H256::from_slice(self.s()) < expected &&
+			H256::from_slice(self.s()) >= one
 	}
 }
 
@@ -104,16 +107,16 @@ impl Eq for Signature { }
 impl fmt::Debug for Signature {
 	fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
 		f.debug_struct("Signature")
-			.field("r", &self.0[0..32].to_hex())
-			.field("s", &self.0[32..64].to_hex())
-			.field("v", &self.0[64..65].to_hex())
+            .field("r", &self.0[0..32].to_hex::<String>())
+            .field("s", &self.0[32..64].to_hex::<String>())
+            .field("v", &self.0[64..65].to_hex::<String>())
 		.finish()
 	}
 }
 
 impl fmt::Display for Signature {
 	fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-		write!(f, "{}", self.to_hex())
+		write!(f, "{}", self.to_hex::<String>())
 	}
 }
 
@@ -121,7 +124,7 @@ impl FromStr for Signature {
 	type Err = Error;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		match s.from_hex() {
+		match s.from_hex::<Vec<u8>>() {
 			Ok(ref hex) if hex.len() == 65 => {
 				let mut data = [0; 65];
 				data.copy_from_slice(&hex[0..65]);
@@ -189,8 +192,8 @@ impl DerefMut for Signature {
 }
 
 pub fn sign(secret: &Secret, message: &Message) -> Result<Signature, Error> {
-	let msg = SecpMessage::from_slice(&message[..])?;
-	let sec = SecretKey::from_slice(&secret)?;
+	let msg = SecpMessage::from_slice(message.as_bytes())?;
+	let sec = SecretKey::from_slice(secret.as_bytes())?;
 	let (rec_id, s) = Secp256k1::signing_only().sign_recoverable(&msg, &sec).serialize_compact();
 	let mut data_arr = [0; 65];
 
@@ -213,7 +216,7 @@ pub fn recover(signature: &Signature, message: &Message) -> Result<Public, Error
 	let serialized = pubkey.serialize_uncompressed();
 
 	let mut public = Public::default();
-	public.copy_from_slice(&serialized[1..65]);
+	public.as_mut().copy_from_slice(&serialized[1..65]);
 	Ok(public)
 }
 

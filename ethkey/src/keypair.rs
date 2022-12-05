@@ -21,9 +21,9 @@ use keccak::Keccak256;
 use super::{Secret, Public, Address, Error};
 
 pub fn public_to_address(public: &Public) -> Address {
-	let hash = public.keccak256();
+	let hash = public.as_bytes().keccak256();
 	let mut result = Address::default();
-	result.copy_from_slice(&hash[12..]);
+	result.as_mut().copy_from_slice(&hash[12..]);
 	result
 }
 
@@ -36,9 +36,9 @@ pub struct KeyPair {
 
 impl fmt::Display for KeyPair {
 	fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-		writeln!(f, "secret:  {}", self.secret.to_hex())?;
-		writeln!(f, "public:  {}", self.public.to_hex())?;
-		write!(f, "address: {}", self.address().to_hex())
+		writeln!(f, "secret:  {}", self.secret.to_hex::<String>())?;
+        writeln!(f, "public:  {}", self.public.as_bytes().to_hex::<String>())?;
+        write!(f, "address: {}", self.address().as_bytes().to_hex::<String>())
 	}
 }
 
@@ -50,7 +50,7 @@ impl KeyPair {
 		let serialized = pub_key.serialize_uncompressed();
 
 		let mut public = Public::default();
-		public.copy_from_slice(&serialized[1..65]);
+		public.as_mut().copy_from_slice(&serialized[1..65]);
 
 		let keypair = KeyPair {
 			secret,
@@ -68,7 +68,7 @@ impl KeyPair {
 		let serialized = publ.serialize_uncompressed();
 		let secret = Secret::from(sec);
 		let mut public = Public::default();
-		public.copy_from_slice(&serialized[1..65]);
+		public.as_mut().copy_from_slice(&serialized[1..65]);
 
 		KeyPair {
 			secret,

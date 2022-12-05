@@ -6,11 +6,11 @@ authors = ["Parity Technologies <admin@parity.io>"]
 
 [dependencies]
 ethkey = { path = "../../ethkey" }
-keccak-hash = { git = "https://github.com/artemii235/parity-common" }
-rlp = { git = "https://github.com/artemii235/parity-common" }
+keccak-hash = { git = "https://github.com/sergeyboyko0791/parity-common" }
+rlp = { git = "https://github.com/sergeyboyko0791/parity-common" }
 unexpected = { path = "../../util/unexpected" }
-ethereum-types = { version = "0.4", default-features = false, features = ["std", "serialize"] }
-rustc-hex= "1.0"
+ethereum-types = { git = "https://github.com/sergeyboyko0791/parity-common", default-features = false, features = ["rlp", "std", "serialize"] }
+rustc-hex = "2.1.0"
 
 [features]
 json-tests = []
