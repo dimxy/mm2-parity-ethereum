@@ -97,8 +97,9 @@ checksum = "bbbaaaf38131deb9ca518a274a45bfdb8771f139517b073b16c2d3d32ae5037b"
 
 [[package]]
 name = "ethbloom"
-version = "0.13.0"
-source = "git+https://github.com/sergeyboyko0791/parity-common.git#75c53010768ddafd8076869887f969f4d6408043"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11da94e443c60508eb62cf256243a64da87304c2802ac2528847f79d750007ef"
 dependencies = [
  "crunchy 0.2.2",
  "fixed-hash",
@@ -121,8 +122,9 @@ dependencies = [
 
 [[package]]
 name = "ethereum-types"
-version = "0.14.1"
-source = "git+https://github.com/sergeyboyko0791/parity-common.git#75c53010768ddafd8076869887f969f4d6408043"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b2827b94c556145446fcce834ca86b7abf0c39a805883fe20e72c5bfdb5a0dc6"
 dependencies = [
  "ethbloom",
  "fixed-hash",
@@ -151,8 +153,9 @@ dependencies = [
 
 [[package]]
 name = "fixed-hash"
-version = "0.8.0"
-source = "git+https://github.com/sergeyboyko0791/parity-common.git#75c53010768ddafd8076869887f969f4d6408043"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cfcf0ed7fe52a17a03854ec54a9f76d6d84508d1c0e66bc1793301c73fc8493c"
 dependencies = [
  "byteorder",
  "rand 0.8.5",
@@ -192,7 +195,8 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 [[package]]
 name = "impl-codec"
 version = "0.6.0"
-source = "git+https://github.com/sergeyboyko0791/parity-common.git#75c53010768ddafd8076869887f969f4d6408043"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ba6a270039626615617f3f36d15fc827041df3b78c439da2cadfa47455a77f2f"
 dependencies = [
  "parity-scale-codec",
 ]
@@ -200,15 +204,17 @@ dependencies = [
 [[package]]
 name = "impl-rlp"
 version = "0.3.0"
-source = "git+https://github.com/sergeyboyko0791/parity-common.git#75c53010768ddafd8076869887f969f4d6408043"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f28220f89297a075ddc7245cd538076ee98b01f2a9c23a53a4f1105d5a322808"
 dependencies = [
  "rlp",
 ]
 
 [[package]]
 name = "impl-serde"
-version = "0.4.0"
-source = "git+https://github.com/sergeyboyko0791/parity-common.git#75c53010768ddafd8076869887f969f4d6408043"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4551f042f3438e64dbd6226b20527fc84a6e1fe65688b58746a2f53623f25f5c"
 dependencies = [
  "serde",
 ]
@@ -227,7 +233,7 @@ dependencies = [
 [[package]]
 name = "keccak-hash"
 version = "0.10.0"
-source = "git+https://github.com/sergeyboyko0791/parity-common.git#75c53010768ddafd8076869887f969f4d6408043"
+source = "git+https://github.com/sergeyboyko0791/parity-common.git#13418bdcfa001f2e71e4597be1920bc2b76a04b7"
 dependencies = [
  "primitive-types",
  "tiny-keccak 2.0.2",
@@ -309,8 +315,9 @@ checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 
 [[package]]
 name = "primitive-types"
-version = "0.12.1"
-source = "git+https://github.com/sergeyboyko0791/parity-common.git#75c53010768ddafd8076869887f969f4d6408043"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e28720988bff275df1f51b171e1b2a18c30d194c4d2b61defdacecd625a5d94a"
 dependencies = [
  "fixed-hash",
  "impl-codec",
@@ -502,7 +509,8 @@ dependencies = [
 [[package]]
 name = "rlp"
 version = "0.5.2"
-source = "git+https://github.com/sergeyboyko0791/parity-common.git#75c53010768ddafd8076869887f969f4d6408043"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bb919243f34364b6bd2fc10ef797edbfa75f33c252e7998527479c6d6b47e1ec"
 dependencies = [
  "bytes",
  "rustc-hex",
@@ -623,7 +631,8 @@ dependencies = [
 [[package]]
 name = "uint"
 version = "0.9.5"
-source = "git+https://github.com/sergeyboyko0791/parity-common.git#75c53010768ddafd8076869887f969f4d6408043"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "76f64bba2c53b04fcab63c01a7d7427eadc821e3bc48c34dc9ba29c501164b52"
 dependencies = [
  "byteorder",
  "crunchy 0.2.2",
