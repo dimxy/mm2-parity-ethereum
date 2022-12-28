@@ -6,7 +6,7 @@ authors = ["Parity Technologies <admin@parity.io>"]
 
 [dependencies]
 ethkey = { path = "../../ethkey" }
-keccak-hash = { git = "https://github.com/sergeyboyko0791/parity-common" }
+keccak-hash = "0.10.0"
 rlp = { version = "0.5.2" }
 unexpected = { path = "../../util/unexpected" }
 ethereum-types = { version = "0.13", default-features = false, features = ["rlp", "std", "serialize"] }

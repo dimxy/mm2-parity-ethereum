@@ -8,5 +8,6 @@ license = "GPL-3.0"
 [dependencies]
 ethereum-types = { version = "0.4", default-features = false, features = ["std", "serialize"] }
 tiny-keccak = "1.4.2"
-hashdb = { git = "https://github.com/sergeyboyko0791/parity-common" }
-plain_hasher = { git = "https://github.com/sergeyboyko0791/parity-common" }
+hashdb = { git = "https://github.com/artemii235/parity-common" }
+plain_hasher = { git = "https://github.com/artemii235/parity-common" }
+
