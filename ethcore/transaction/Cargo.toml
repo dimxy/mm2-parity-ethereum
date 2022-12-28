@@ -6,7 +6,7 @@ authors = ["Parity Technologies <admin@parity.io>"]
 
 [dependencies]
 ethkey = { path = "../../ethkey" }
-keccak-hash = "0.10.0"
+keccak-hash = "0.9.0"
 rlp = { version = "0.5.2" }
 unexpected = { path = "../../util/unexpected" }
 ethereum-types = { version = "0.13", default-features = false, features = ["rlp", "std", "serialize"] }
