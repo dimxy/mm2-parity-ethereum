@@ -298,10 +298,9 @@ impl UnverifiedTransaction {
 
 	/// Construct a signature object from the sig.
 	pub fn signature(&self) -> Signature {
-		// TODO not sure about this because `to_big_endian` is used internally.
-		let r: [u8; 32] = self.r.into();
-		let s: [u8; 32] = self.s.into();
-		Signature::from_rsv(&r.into(), &s.into(), self.standard_v())
+		let r = h256_from_u256(self.r);
+		let s = h256_from_u256(self.s);
+		Signature::from_rsv(&r, &s, self.standard_v())
 	}
 
 	/// Checks whether the signature has a low 's' value.
@@ -500,6 +499,14 @@ impl From<SignedTransaction> for PendingTransaction {
 			condition: None,
 		}
 	}
+}
+
+/// Reproduces the same conversion as it was in the previous `ethereum-types-0.4` version:
+/// https://docs.rs/ethereum-types/0.4.0/src/ethereum_types/hash.rs.html#32-38
+fn h256_from_u256(num: U256) -> H256 {
+	// `U256::to_big_endian` is used internally.
+	let bytes: [u8; 32] = num.into();
+	H256::from(bytes)
 }
 
 #[cfg(test)]
