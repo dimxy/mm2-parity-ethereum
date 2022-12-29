@@ -15,6 +15,7 @@
 // along with Parity.  If not, see <http://www.gnu.org/licenses/>.
 
 use std::fmt;
+use std::iter::FromIterator;
 use std::ops::Deref;
 use std::str::FromStr;
 use rustc_hex::ToHex;
@@ -30,8 +31,8 @@ pub struct Secret {
 }
 
 impl ToHex for Secret {
-	fn to_hex(&self) -> String {
-		format!("{:x}", *self.inner)
+	fn to_hex<T: FromIterator<char>>(&self) -> T {
+		T::from_iter(format!("{:x}", *self.inner).chars())
 	}
 }
 
@@ -60,7 +61,7 @@ impl Secret {
 			return None
 		}
 		let mut h = H256::default();
-		h.copy_from_slice(&key[0..32]);
+		h.as_mut().copy_from_slice(&key[0..32]);
 		Some(Secret { inner: Memzero::from(h) })
 	}
 
