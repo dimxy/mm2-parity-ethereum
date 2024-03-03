@@ -24,7 +24,7 @@ extern crate unexpected;
 extern crate rustc_hex;
 
 mod error;
-mod transaction;
+mod tx_types;
 
 pub use error::Error;
-pub use transaction::*;
+pub use tx_types::*;
