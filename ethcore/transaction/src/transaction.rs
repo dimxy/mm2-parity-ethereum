@@ -27,11 +27,11 @@ use std::convert::TryInto;
 use std::ops::Deref;
 
 mod legacy;
-use self::legacy::{LegacyTransaction, UnverifiedLegacyTransaction};
+pub use self::legacy::{LegacyTransaction, UnverifiedLegacyTransaction};
 mod eip2930;
-use self::eip2930::{Eip2930Transaction, UnverifiedEip2930Transaction, EIP2930_TX_TYPE};
+pub use self::eip2930::{Eip2930Transaction, UnverifiedEip2930Transaction, EIP2930_TX_TYPE};
 mod eip1559;
-use self::eip1559::{Eip1559Transaction, UnverifiedEip1559Transaction, EIP1559_TX_TYPE};
+pub use self::eip1559::{Eip1559Transaction, UnverifiedEip1559Transaction, EIP1559_TX_TYPE};
 
 type BlockNumber = u64;
 type Bytes = Vec<u8>;
