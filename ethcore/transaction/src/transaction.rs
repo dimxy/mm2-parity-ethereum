@@ -89,7 +89,7 @@ pub enum Condition {
 	Timestamp(u64),
 }
 
-type TransactionSharedRet = dyn TransactionShared + Send + 'static;
+type TransactionSharedRet = dyn TransactionShared + Send + Sync + 'static;
 
 /// Methods common for all tx versions
 pub trait TransactionShared {
