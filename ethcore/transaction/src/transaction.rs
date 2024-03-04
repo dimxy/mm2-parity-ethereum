@@ -89,6 +89,8 @@ pub enum Condition {
 	Timestamp(u64),
 }
 
+type TransactionSharedRet = dyn TransactionShared + Send + 'static;
+
 /// Methods common for all tx versions
 pub trait TransactionShared {
 	fn nonce(&self) -> U256;
@@ -292,11 +294,11 @@ impl UnverifiedTransactionWrapper {
 		};
 	}
 
-	pub fn unsigned(&self) -> &dyn TransactionShared {
+	pub fn unsigned(&self) -> &TransactionSharedRet {
 		match self {
-			UnverifiedTransactionWrapper::Legacy(tx) => &tx.unsigned as &dyn TransactionShared,
-			UnverifiedTransactionWrapper::Eip2930(tx) => &tx.unsigned as &dyn TransactionShared,
-			UnverifiedTransactionWrapper::Eip1559(tx) => &tx.unsigned as &dyn TransactionShared,
+			UnverifiedTransactionWrapper::Legacy(tx) => &tx.unsigned as &TransactionSharedRet,
+			UnverifiedTransactionWrapper::Eip2930(tx) => &tx.unsigned as &TransactionSharedRet,
+			UnverifiedTransactionWrapper::Eip1559(tx) => &tx.unsigned as &TransactionSharedRet,
 		}
 	}
 
@@ -484,11 +486,11 @@ impl SignedTransaction {
 		}
 	}
 
-	pub fn unsigned(&self) -> &dyn TransactionShared {
+	pub fn unsigned(&self) -> &TransactionSharedRet {
 		match &self.transaction {
-			UnverifiedTransactionWrapper::Legacy(tx) => &tx.unsigned as &dyn TransactionShared,
-			UnverifiedTransactionWrapper::Eip2930(tx) => &tx.unsigned as &dyn TransactionShared,
-			UnverifiedTransactionWrapper::Eip1559(tx) => &tx.unsigned as &dyn TransactionShared,
+			UnverifiedTransactionWrapper::Legacy(tx) => &tx.unsigned as &TransactionSharedRet,
+			UnverifiedTransactionWrapper::Eip2930(tx) => &tx.unsigned as &TransactionSharedRet,
+			UnverifiedTransactionWrapper::Eip1559(tx) => &tx.unsigned as &TransactionSharedRet,
 		}
 	}
 
