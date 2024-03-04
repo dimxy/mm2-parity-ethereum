@@ -26,12 +26,12 @@ use rlp::{self, DecoderError, Rlp, RlpStream};
 use std::convert::TryInto;
 use std::ops::Deref;
 
-mod legacy;
 pub mod tx_builders;
 pub use self::tx_builders::TransactionWrapperBuilder;
+
+mod legacy;
 pub use self::legacy::{LegacyTransaction, UnverifiedLegacyTransaction};
-mod eip2930;
-pub use self::eip2930::{Eip2930Transaction, UnverifiedEip2930Transaction, EIP2930_TX_TYPE};
+
 mod eip1559;
 pub use self::eip1559::{Eip1559Transaction, UnverifiedEip1559Transaction, EIP1559_TX_TYPE};
 
@@ -123,7 +123,6 @@ pub trait SignedTransactionShared {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TransactionWrapper {
 	Legacy(LegacyTransaction),
-	Eip2930(Eip2930Transaction),
 	Eip1559(Eip1559Transaction),
 }
 
@@ -132,7 +131,6 @@ impl TransactionWrapper {
 	pub fn message_hash(&self, chain_id: Option<u64>) -> H256 {
 		match self {
 			TransactionWrapper::Legacy(tx) => tx.message_hash(chain_id),
-			TransactionWrapper::Eip2930(tx) => tx.message_hash(None),
 			TransactionWrapper::Eip1559(tx) => tx.message_hash(None),
 		}
 	}
@@ -210,7 +208,6 @@ impl TransactionWrapper {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum UnverifiedTransactionWrapper {
 	Legacy(UnverifiedLegacyTransaction),
-	Eip2930(UnverifiedEip2930Transaction),
 	Eip1559(UnverifiedEip1559Transaction),
 }
 
@@ -219,9 +216,6 @@ impl rlp::Decodable for UnverifiedTransactionWrapper {
 		if is_typed_transaction(d) {
 			// first byte is tx version
 			match d.as_raw()[0] {
-				EIP2930_TX_TYPE => Ok(UnverifiedTransactionWrapper::Eip2930(
-					UnverifiedEip2930Transaction::decode(d)?,
-				)),
 				EIP1559_TX_TYPE => Ok(UnverifiedTransactionWrapper::Eip1559(
 					UnverifiedEip1559Transaction::decode(d)?,
 				)),
@@ -252,15 +246,6 @@ impl UnverifiedTransactionWrapper {
 					hash,
 				})
 			}
-			TransactionWrapper::Eip2930(unsigned) => {
-				UnverifiedTransactionWrapper::Eip2930(UnverifiedEip2930Transaction {
-					unsigned,
-					r,
-					s,
-					v: v.try_into().unwrap(),
-					hash,
-				})
-			}
 			TransactionWrapper::Eip1559(unsigned) => {
 				UnverifiedTransactionWrapper::Eip1559(UnverifiedEip1559Transaction {
 					unsigned,
@@ -278,9 +263,6 @@ impl UnverifiedTransactionWrapper {
 			UnverifiedTransactionWrapper::Legacy(tx) => {
 				UnverifiedTransactionWrapper::Legacy(tx.compute_hash())
 			}
-			UnverifiedTransactionWrapper::Eip2930(tx) => {
-				UnverifiedTransactionWrapper::Eip2930(tx.compute_hash())
-			}
 			UnverifiedTransactionWrapper::Eip1559(tx) => {
 				UnverifiedTransactionWrapper::Eip1559(tx.compute_hash())
 			}
@@ -291,7 +273,6 @@ impl UnverifiedTransactionWrapper {
 	fn rlp_append_sealed_transaction(&self, s: &mut RlpStream) {
 		match self {
 			UnverifiedTransactionWrapper::Legacy(tx) => tx.rlp_append_sealed_transaction(s),
-			UnverifiedTransactionWrapper::Eip2930(tx) => tx.rlp_append_sealed_transaction(s),
 			UnverifiedTransactionWrapper::Eip1559(tx) => tx.rlp_append_sealed_transaction(s),
 		};
 	}
@@ -299,7 +280,6 @@ impl UnverifiedTransactionWrapper {
 	pub fn unsigned(&self) -> &TransactionSharedRet {
 		match self {
 			UnverifiedTransactionWrapper::Legacy(tx) => &tx.unsigned as &TransactionSharedRet,
-			UnverifiedTransactionWrapper::Eip2930(tx) => &tx.unsigned as &TransactionSharedRet,
 			UnverifiedTransactionWrapper::Eip1559(tx) => &tx.unsigned as &TransactionSharedRet,
 		}
 	}
@@ -308,7 +288,6 @@ impl UnverifiedTransactionWrapper {
 	pub fn standard_v(&self) -> u8 {
 		match self {
 			UnverifiedTransactionWrapper::Legacy(tx) => tx.standard_v(),
-			UnverifiedTransactionWrapper::Eip2930(tx) => tx.standard_v(),
 			UnverifiedTransactionWrapper::Eip1559(tx) => tx.standard_v(),
 		}
 	}
@@ -404,7 +383,6 @@ impl UnverifiedTransactionWrapper {
 	fn validate_empty_sig(&self) -> bool {
 		match self {
 			UnverifiedTransactionWrapper::Legacy(tx) => tx.validate_eip86(),
-			UnverifiedTransactionWrapper::Eip2930(_tx) => true, // TODO: what is it for eip2930?
 			UnverifiedTransactionWrapper::Eip1559(_tx) => true, // TODO: what is it for eip1559?
 		}
 	}
@@ -412,21 +390,18 @@ impl UnverifiedTransactionWrapper {
 	fn r(&self) -> U256 {
 		match self {
 			UnverifiedTransactionWrapper::Legacy(tx) => tx.r,
-			UnverifiedTransactionWrapper::Eip2930(tx) => tx.r,
 			UnverifiedTransactionWrapper::Eip1559(tx) => tx.r,
 		}
 	}
 	fn s(&self) -> U256 {
 		match self {
 			UnverifiedTransactionWrapper::Legacy(tx) => tx.s,
-			UnverifiedTransactionWrapper::Eip2930(tx) => tx.s,
 			UnverifiedTransactionWrapper::Eip1559(tx) => tx.s,
 		}
 	}
 	fn v(&self) -> u64 {
 		match self {
 			UnverifiedTransactionWrapper::Legacy(tx) => tx.network_v,
-			UnverifiedTransactionWrapper::Eip2930(tx) => tx.v as u64,
 			UnverifiedTransactionWrapper::Eip1559(tx) => tx.v as u64,
 		}
 	}
@@ -435,7 +410,6 @@ impl UnverifiedTransactionWrapper {
 	pub fn tx_hash(&self) -> H256 {
 		match self {
 			UnverifiedTransactionWrapper::Legacy(tx) => tx.hash,
-			UnverifiedTransactionWrapper::Eip2930(tx) => tx.hash,
 			UnverifiedTransactionWrapper::Eip1559(tx) => tx.hash,
 		}
 	}
@@ -491,7 +465,6 @@ impl SignedTransaction {
 	pub fn unsigned(&self) -> &TransactionSharedRet {
 		match &self.transaction {
 			UnverifiedTransactionWrapper::Legacy(tx) => &tx.unsigned as &TransactionSharedRet,
-			UnverifiedTransactionWrapper::Eip2930(tx) => &tx.unsigned as &TransactionSharedRet,
 			UnverifiedTransactionWrapper::Eip1559(tx) => &tx.unsigned as &TransactionSharedRet,
 		}
 	}
@@ -720,31 +693,6 @@ mod tests {
 		test_vector("f867078504a817c807830290409435353535353535353535353535353535353535358201578025a052f1a9b320cab38e5da8a8f97989383aab0a49165fc91c737310e4f7e9821021a052f1a9b320cab38e5da8a8f97989383aab0a49165fc91c737310e4f7e9821021", "0xd37922162ab7cea97c97a87551ed02c9a38b7332");
 		test_vector("f867088504a817c8088302e2489435353535353535353535353535353535353535358202008025a064b1702d9298fee62dfeccc57d322a463ad55ca201256d01f62b45b2e1c21c12a064b1702d9298fee62dfeccc57d322a463ad55ca201256d01f62b45b2e1c21c10", "0x9bddad43f934d313c2b79ca28a432dd2b7281029");
 		test_vector("f867098504a817c809830334509435353535353535353535353535353535353535358202d98025a052f8f61201b2b11a78d6e866abc9c3db2ae8631fa656bfe5cb53668255367afba052f8f61201b2b11a78d6e866abc9c3db2ae8631fa656bfe5cb53668255367afb", "0x3c24d7329e92f84f08556ceb6df1cdb0104ca49f");
-	}
-
-	#[test]
-	fn tx_type_1_parse_tx() {
-		use rustc_hex::FromHex;
-
-		let test_vector = |tx_data: &str, address: &'static str, hash: &'static str| {
-			let bytes: Vec<u8> = FromHex::from_hex(tx_data).unwrap();
-			let unverified = rlp::decode(&bytes).expect("decoding tx data failed");
-			let signed = SignedTransaction::new(unverified).unwrap();
-
-			let expected_addr = Address::from_str(address).unwrap();
-			assert_eq!(signed.sender(), expected_addr);
-			let expected_hash = H256::from_str(hash).unwrap();
-			let unverified_tx = signed.transaction.clone().compute_hash();
-			assert_eq!(unverified_tx.tx_hash(), expected_hash);
-
-			if let UnverifiedTransactionWrapper::Eip2930(tx) = signed.transaction {
-				println!("chainid: {:?}", tx.chain_id);
-			} else {
-				panic!("expected tx type 1 (eip-2930)");
-			}
-		};
-		// type 1, empty access list
-		test_vector("01f87201830180058504375e83908307a120942f3e89bb84705085dd2afc1f00ca5f823ff7f6088801aaaf118d612c0080c080a04f08e11860459e944e28a39193b76cc2ca0566bea40c086160f6c44ce43dd6fca07333d8b6c872a4d599cb4027c9129941c2691f09ce1cbea361a827bc30e78e54", "0x264bd8291fAE1D75DB2c5F573b07faA6715997B5", "0xe9b033c089745a1b70003586e8a1fbdb59d407c5943f00193d5c562194042524");
 	}
 
 	#[test]

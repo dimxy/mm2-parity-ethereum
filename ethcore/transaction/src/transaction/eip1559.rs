@@ -2,15 +2,70 @@
 //
 //! Eip 1559 transaction encoding/decoding and specific checks
 
-use super::eip2930::AccessList;
 use super::SignedTransactionShared;
-use super::{Action, Bytes, TransactionShared};
+use super::{Address, Action, Bytes, TransactionShared};
 use ethereum_types::{H256, U256};
 use hash::keccak;
 use rlp::{self, DecoderError, Rlp, RlpStream};
 use std::{convert::TryInto, ops::Deref};
 
 pub const EIP1559_TX_TYPE: u8 = 2;
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Default)]
+pub struct AccessListItem {
+	/// Account addresses that would be loaded at the start of execution
+	pub address: Address,
+	/// Keys of storage that would be loaded at the start of execution
+	pub storage_keys: Vec<H256>,
+}
+
+impl rlp::Decodable for AccessListItem {
+	fn decode(d: &Rlp) -> Result<Self, DecoderError> {
+		let address = Address::decode(&d.at(0)?)?;
+		let keys_rlp = d.at(1)?;
+		let mut storage_keys: Vec<H256> = vec![];
+		for i in 0..keys_rlp.item_count()? {
+			storage_keys.push(H256::decode(&keys_rlp.at(i)?)?);
+		}
+		Ok(AccessListItem { address, storage_keys })
+	}
+}
+
+impl rlp::Encodable for AccessListItem {
+	fn rlp_append(&self, s: &mut RlpStream) {
+		s.begin_list(2);
+		s.append(&self.address);
+
+		s.begin_list(self.storage_keys.len());
+		for i in 0..self.storage_keys.len() {
+			s.append(&self.storage_keys[i]);
+		}
+	}
+}
+
+/// AccessList as defined in EIP-2930
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Default)]
+pub struct AccessList(pub Vec<AccessListItem>);
+
+impl rlp::Decodable for AccessList {
+	fn decode(d: &Rlp) -> Result<Self, DecoderError> {
+		let mut items: Vec<AccessListItem> = vec![];
+		for i in 0..d.item_count()? {
+			let item = AccessListItem::decode(&d.at(i)?)?;
+			items.push(item);
+		}
+		Ok(AccessList(items))
+	}
+}
+
+impl rlp::Encodable for AccessList {
+	fn rlp_append(&self, s: &mut RlpStream) {
+		s.begin_list(self.0.len());
+		for i in 0..self.0.len() {
+			s.append(&self.0[i]);
+		}
+	}
+}
 
 /// A set of information describing an externally-originating message call
 /// or contract creation operation.

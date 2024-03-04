@@ -1,6 +1,6 @@
 //! Transaction builders
 
-use super::{Bytes, eip2930::AccessList, Action, TransactionWrapper, U256, Eip1559Transaction, LegacyTransaction};
+use super::{Bytes, eip1559::AccessList, Action, TransactionWrapper, U256, Eip1559Transaction, LegacyTransaction};
 
 pub enum TxBuilderError {
     NoGasDetailsSet,
