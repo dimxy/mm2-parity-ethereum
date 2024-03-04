@@ -27,6 +27,8 @@ use std::convert::TryInto;
 use std::ops::Deref;
 
 mod legacy;
+pub mod tx_builders;
+pub use self::tx_builders::TransactionWrapperBuilder;
 pub use self::legacy::{LegacyTransaction, UnverifiedLegacyTransaction};
 mod eip2930;
 pub use self::eip2930::{Eip2930Transaction, UnverifiedEip2930Transaction, EIP2930_TX_TYPE};
