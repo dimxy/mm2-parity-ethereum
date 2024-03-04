@@ -2,8 +2,10 @@
 
 use super::{Bytes, eip1559::AccessList, Action, TransactionWrapper, U256, Eip1559Transaction, LegacyTransaction};
 
+#[derive(Debug, PartialEq, Clone)]
 pub enum TxBuilderError {
-    NoGasDetailsSet,
+    /// No gas price or pricority fee per gas set 
+    NoGasPriceSet,
 }
 
 pub struct TransactionWrapperBuilder {
@@ -76,7 +78,7 @@ impl TransactionWrapperBuilder {
                 access_list: if let Some(access_list) = self.access_list { access_list } else { AccessList::default() },
             }))
         } else {
-            Err(TxBuilderError::NoGasDetailsSet)
+            Err(TxBuilderError::NoGasPriceSet)
         }
     }
 }
