@@ -484,6 +484,14 @@ impl SignedTransaction {
 		}
 	}
 
+	pub fn unsigned(&self) -> &dyn TransactionShared {
+		match &self.transaction {
+			UnverifiedTransactionWrapper::Legacy(tx) => &tx.unsigned as &dyn TransactionShared,
+			UnverifiedTransactionWrapper::Eip2930(tx) => &tx.unsigned as &dyn TransactionShared,
+			UnverifiedTransactionWrapper::Eip1559(tx) => &tx.unsigned as &dyn TransactionShared,
+		}
+	}
+
 	/// Returns transaction sender.
 	pub fn sender(&self) -> Address {
 		self.sender
