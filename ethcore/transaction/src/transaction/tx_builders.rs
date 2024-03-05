@@ -1,13 +1,23 @@
 //! Transaction builders
-
+use std::fmt;
 use super::{Bytes, eip1559::AccessList, Action, TransactionWrapper, U256, Eip1559Transaction, LegacyTransaction};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum TxBuilderError {
     /// No gas price or priority fee per gas set 
     NoGasPriceSet,
-    /// Chain_id must be set for tx type >= 1 
+    /// Chain id must be set for tx type >= 1 
     NoChainIdSet,
+}
+
+impl fmt::Display for TxBuilderError {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		let msg: String = match *self {
+			TxBuilderError::NoGasPriceSet => "No gas price or priority fee per gas set".into(),
+			TxBuilderError::NoChainIdSet => "Chain id must be set".into(),
+        };
+        f.write_fmt(format_args!("Transaction builder error ({})", msg))
+    }
 }
 
 pub struct TransactionWrapperBuilder {
