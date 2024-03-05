@@ -4,8 +4,10 @@ use super::{Bytes, eip1559::AccessList, Action, TransactionWrapper, U256, Eip155
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum TxBuilderError {
-    /// No gas price or pricority fee per gas set 
+    /// No gas price or priority fee per gas set 
     NoGasPriceSet,
+    /// Chain_id must be set for tx type >= 1 
+    NoChainIdSet,
 }
 
 pub struct TransactionWrapperBuilder {
@@ -35,6 +37,11 @@ impl TransactionWrapperBuilder {
             data,
             access_list: None,
         }
+    }
+
+    pub fn with_chain_id(mut self, chain_id: u64) -> Self {
+        self.chain_id = Some(chain_id);
+        self
     }
 
     pub fn with_gas_price(mut self, gas_price: U256) -> Self {
@@ -78,7 +85,11 @@ impl TransactionWrapperBuilder {
                 access_list: if let Some(access_list) = self.access_list { access_list } else { AccessList::default() },
             }))
         } else {
-            Err(TxBuilderError::NoGasPriceSet)
+            if !matches!(self.chain_id, Some(_chain_id)) {
+                Err(TxBuilderError::NoChainIdSet)
+            } else {
+                Err(TxBuilderError::NoGasPriceSet)
+            }
         }
     }
 }
