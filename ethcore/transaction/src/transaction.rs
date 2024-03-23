@@ -381,11 +381,13 @@ impl UnverifiedTransactionWrapper {
 
 	/// validate tx with empty signature
 	fn validate_empty_sig(&self) -> bool {
+		/* looks like EIP-86 is not actual 
 		match self {
 			UnverifiedTransactionWrapper::Legacy(tx) => tx.validate_eip86(),
-			UnverifiedTransactionWrapper::Eip1559(_tx) => true, // TODO: what is it for eip1559?
-		}
-	}
+			UnverifiedTransactionWrapper::Eip1559(_tx) => true,
+		} */
+		false
+	} 
 
 	fn r(&self) -> U256 {
 		match self {
