@@ -238,9 +238,4 @@ impl UnverifiedEip1559Transaction {
 	pub fn standard_v(&self) -> u8 {
 		self.v.try_into().unwrap_or_default() // we should have parity 0 or 1  for v2 txns
 	}
-
-	// EIP-86 or newer: Transactions of this form MUST have gasprice = 0, nonce = 0, value = 0, and do NOT increment the nonce of account 0.
-	pub(crate) fn _validate_empty_sig(&self) -> bool {
-		true // TODO fix for eip1559
-	}
 }

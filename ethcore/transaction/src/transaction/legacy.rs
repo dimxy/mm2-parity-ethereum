@@ -163,11 +163,6 @@ impl UnverifiedLegacyTransaction {
 	pub fn to_network_v(v: u64, chain_id: Option<u64>) -> u64 {
 		eip155_methods::add_chain_replay_protection(v, chain_id)
 	}
-
-	// EIP-86: Transactions of this form MUST have gasprice = 0, nonce = 0, value = 0, and do NOT increment the nonce of account 0.
-	pub(crate) fn validate_eip86(&self) -> bool {
-		self.gas_price.is_zero() && self.value.is_zero() && self.nonce.is_zero()
-	}
 }
 
 /// Replay protection logic for v part of transaction's signature
