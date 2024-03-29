@@ -227,10 +227,13 @@ impl rlp::Decodable for UnverifiedTransactionWrapper {
 }
 
 impl UnverifiedTransactionWrapper {
+    /// Creates new UnverifiedTransactionWrapper from TransactionWrapper and signature params. 
+    /// For Legacy transactions param v must be not modified for replay protection with chain_id.
+    /// Internally used.
     fn new(tx: TransactionWrapper, r: U256, s: U256, v: u64, chain_id: Option<u64>, hash: H256) -> Result<Self, Error> {
         match tx {
             TransactionWrapper::Legacy(unsigned) => Ok(UnverifiedTransactionWrapper::Legacy(
-                UnverifiedLegacyTransaction::new(unsigned, r, s, v, chain_id, hash)?,
+                UnverifiedLegacyTransaction::new_with_chain_id(unsigned, r, s, v, chain_id, hash)?,
             )),
             TransactionWrapper::Eip2930(unsigned) => Ok(UnverifiedTransactionWrapper::Eip2930(
                 UnverifiedEip2930Transaction::new(unsigned, r, s, v, hash)?,

@@ -128,7 +128,7 @@ impl SignedTransactionShared for UnverifiedLegacyTransaction {
 }
 
 impl UnverifiedLegacyTransaction {
-    pub fn new(
+    pub fn new_with_chain_id(
         unsigned: LegacyTransaction,
         r: U256,
         s: U256,
@@ -141,6 +141,22 @@ impl UnverifiedLegacyTransaction {
             r,
             s,
             network_v: Self::to_network_v(v, chain_id),
+            hash,
+        })
+    }
+
+    pub fn new_with_network_v(
+        unsigned: LegacyTransaction,
+        r: U256,
+        s: U256,
+        network_v: u64,
+        hash: H256,
+    ) -> Result<Self, Error> {
+        Ok(UnverifiedLegacyTransaction {
+            unsigned,
+            r,
+            s,
+            network_v,
             hash,
         })
     }
