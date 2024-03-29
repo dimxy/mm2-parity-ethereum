@@ -136,6 +136,9 @@ impl UnverifiedLegacyTransaction {
         chain_id: Option<u64>,
         hash: H256,
     ) -> Result<Self, Error> {
+        if !Self::validate_v(v) {
+            return Err(Error::InvalidSignature("invalid sig v".into()));
+        }
         Ok(UnverifiedLegacyTransaction {
             unsigned,
             r,
@@ -144,6 +147,8 @@ impl UnverifiedLegacyTransaction {
             hash,
         })
     }
+
+    fn validate_v(v: u64) -> bool { (0..=1).contains(&v) }
 
     pub fn new_with_network_v(
         unsigned: LegacyTransaction,
