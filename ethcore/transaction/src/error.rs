@@ -17,8 +17,6 @@
 use std::{error, fmt};
 
 use ethereum_types::U256;
-use ethkey;
-use rlp;
 use unexpected::OutOfBounds;
 
 #[derive(Debug, PartialEq, Clone)]

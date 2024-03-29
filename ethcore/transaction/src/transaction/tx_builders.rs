@@ -83,16 +83,16 @@ impl TransactionWrapperBuilder {
         match self.tx_type {
             TxType::Legacy => Ok(TransactionWrapper::Legacy(LegacyTransaction {
                 nonce: self.nonce,
-                gas_price: self.gas_price.ok_or_else(|| TxBuilderError::NoGasPriceSet)?,
+                gas_price: self.gas_price.ok_or(TxBuilderError::NoGasPriceSet)?,
                 gas: self.gas,
                 action: self.action,
                 value: self.value,
                 data: self.data,
             })),
             TxType::Type1 => Ok(TransactionWrapper::Eip2930(Eip2930Transaction {
-                chain_id: self.chain_id.ok_or_else(|| TxBuilderError::NoChainIdSet)?,
+                chain_id: self.chain_id.ok_or(TxBuilderError::NoChainIdSet)?,
                 nonce: self.nonce,
-                gas_price: self.gas_price.ok_or_else(|| TxBuilderError::NoGasPriceSet)?,
+                gas_price: self.gas_price.ok_or(TxBuilderError::NoGasPriceSet)?,
                 gas: self.gas,
                 action: self.action,
                 value: self.value,
@@ -104,12 +104,12 @@ impl TransactionWrapperBuilder {
                 },
             })),
             TxType::Type2 => Ok(TransactionWrapper::Eip1559(Eip1559Transaction {
-                chain_id: self.chain_id.ok_or_else(|| TxBuilderError::NoChainIdSet)?,
+                chain_id: self.chain_id.ok_or(TxBuilderError::NoChainIdSet)?,
                 nonce: self.nonce,
-                max_fee_per_gas: self.max_fee_per_gas.ok_or_else(|| TxBuilderError::NoFeePerGasSet)?,
+                max_fee_per_gas: self.max_fee_per_gas.ok_or(TxBuilderError::NoFeePerGasSet)?,
                 max_priority_fee_per_gas: self
                     .max_priority_fee_per_gas
-                    .ok_or_else(|| TxBuilderError::NoFeePerGasSet)?,
+                    .ok_or(TxBuilderError::NoFeePerGasSet)?,
                 gas: self.gas,
                 action: self.action,
                 value: self.value,

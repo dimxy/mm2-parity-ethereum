@@ -116,7 +116,7 @@ impl rlp::Decodable for UnverifiedEip1559Transaction {
         let unsigned = Eip1559Transaction::decode(d)?;
         let hash = keccak(d.as_raw());
         let offset = unsigned.payload_length();
-        if d.as_raw().len() < 1 {
+        if d.as_raw().is_empty() {
             return Err(DecoderError::RlpIsTooShort);
         }
         let list = Rlp::new(&d.as_raw()[1..]);

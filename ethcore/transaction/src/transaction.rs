@@ -23,7 +23,6 @@ use ethereum_types::{Address, H160, H256, U256};
 use ethkey::{self, public_to_address, recover, Public, Secret, Signature};
 use hash::keccak;
 use rlp::{self, DecoderError, Rlp, RlpStream};
-use std::convert::TryInto;
 use std::ops::Deref;
 
 mod legacy;
@@ -258,7 +257,7 @@ impl UnverifiedTransactionWrapper {
                     unsigned,
                     r,
                     s,
-                    v: v.try_into().unwrap(),
+                    v,
                     hash,
                 })
             },
@@ -267,7 +266,7 @@ impl UnverifiedTransactionWrapper {
                     unsigned,
                     r,
                     s,
-                    v: v.try_into().unwrap(),
+                    v,
                     hash,
                 })
             },
@@ -327,7 +326,7 @@ impl UnverifiedTransactionWrapper {
     /// Checks whether the signature has a low 's' value.
     pub fn check_low_s(&self) -> Result<(), ethkey::Error> {
         if !self.signature().is_low_s() {
-            Err(ethkey::Error::InvalidSignature.into())
+            Err(ethkey::Error::InvalidSignature)
         } else {
             Ok(())
         }
@@ -338,10 +337,10 @@ impl UnverifiedTransactionWrapper {
 
     /// Recovers the public key of the sender.
     pub fn recover_public(&self) -> Result<Public, ethkey::Error> {
-        Ok(recover(
+        recover(
             &self.signature(),
             &self.unsigned().message_hash(self.chain_id_from_v()),
-        )?)
+        )
     }
 
     /// Do basic validation, checking for valid signature and minimum gas,
@@ -419,8 +418,8 @@ impl UnverifiedTransactionWrapper {
     fn v(&self) -> u64 {
         match self {
             UnverifiedTransactionWrapper::Legacy(tx) => tx.network_v,
-            UnverifiedTransactionWrapper::Eip2930(tx) => tx.v as u64,
-            UnverifiedTransactionWrapper::Eip1559(tx) => tx.v as u64,
+            UnverifiedTransactionWrapper::Eip2930(tx) => tx.v,
+            UnverifiedTransactionWrapper::Eip1559(tx) => tx.v,
         }
     }
 
@@ -521,7 +520,7 @@ impl LocalizedTransaction {
             return sender;
         }
         if self.is_unsigned() {
-            return UNSIGNED_SENDER.clone();
+            return UNSIGNED_SENDER;
         }
         let sender = public_to_address(&self.recover_public()
 			.expect("LocalizedTransaction is always constructed from transaction from blockchain; Blockchain only stores verified transactions; qed"));
@@ -579,7 +578,7 @@ fn h256_from_u256(num: U256) -> H256 {
 }
 
 /// Returns true if serialized tx has type as in eip-2718
-fn is_typed_transaction(d: &Rlp) -> bool { !d.is_list() && d.as_raw().len() > 0 && d.as_raw()[0] < 0x7f }
+fn is_typed_transaction(d: &Rlp) -> bool { !d.is_list() && !d.as_raw().is_empty() && d.as_raw()[0] < 0x7f }
 
 #[cfg(test)]
 mod tests {
