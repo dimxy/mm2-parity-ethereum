@@ -195,23 +195,6 @@ impl TransactionWrapper {
             public: None,
         }
     }
-
-    /// Add EIP-86 compatible empty signature.
-    pub fn null_sign(self, chain_id: u64) -> SignedTransaction {
-        SignedTransaction {
-            transaction: UnverifiedTransactionWrapper::new(
-                self,
-                U256::zero(),
-                U256::zero(),
-                chain_id,
-                None,
-                H256::from_low_u64_ne(0),
-            )
-            .compute_hash(),
-            sender: UNSIGNED_SENDER,
-            public: None,
-        }
-    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
