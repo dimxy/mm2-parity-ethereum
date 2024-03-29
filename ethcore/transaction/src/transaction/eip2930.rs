@@ -3,7 +3,7 @@
 //! Eip 2930 transaction encoding/decoding and specific checks
 
 use super::{Action, Bytes, TransactionShared, TxType};
-use crate::SignedTransactionShared;
+use crate::{Error, SignedTransactionShared};
 use ethereum_types::{Address, H256, U256};
 use hash::keccak;
 use rlp::{self, DecoderError, Rlp, RlpStream};
@@ -88,12 +88,12 @@ pub struct Eip2930Transaction {
 }
 
 impl Eip2930Transaction {
-    const fn payload_length(&self) -> usize { 8 }
+    const fn payload_size(&self) -> usize { 8 }
 
     /// Append object with a without signature into RLP stream
     fn rlp_append_unsigned_transaction(&self, s: &mut RlpStream) {
         s.append(&(TxType::Type1 as u8));
-        s.begin_list(self.payload_length());
+        s.begin_list(self.payload_size());
         s.append(&self.chain_id);
         s.append(&self.nonce);
         s.append(&self.gas_price);
@@ -145,15 +145,15 @@ impl rlp::Decodable for Eip2930Transaction {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct UnverifiedEip2930Transaction {
     /// Plain Transaction.
-    pub unsigned: Eip2930Transaction,
+    unsigned: Eip2930Transaction,
     /// The V field of the signature
-    pub v: u64,
+    v: u64,
     /// The R field of the signature; helps describe the point on the curve.
-    pub r: U256,
+    r: U256,
     /// The S field of the signature; helps describe the point on the curve.
-    pub s: U256,
+    s: U256,
     /// Hash of the transaction
-    pub hash: H256,
+    hash: H256,
 }
 
 impl Deref for UnverifiedEip2930Transaction {
@@ -166,14 +166,18 @@ impl rlp::Decodable for UnverifiedEip2930Transaction {
     fn decode(d: &Rlp) -> Result<Self, DecoderError> {
         let unsigned = Eip2930Transaction::decode(d)?;
         let hash = keccak(d.as_raw());
-        let offset = unsigned.payload_length();
+        let offset = unsigned.payload_size();
         if d.as_raw().is_empty() {
             return Err(DecoderError::RlpIsTooShort);
         }
         let list = Rlp::new(&d.as_raw()[1..]);
+        let v = list.val_at(offset)?;
+        if !Self::validate_v(v) {
+            return Err(DecoderError::Custom("invalid sig v"));
+        }
         Ok(UnverifiedEip2930Transaction {
             unsigned,
-            v: list.val_at(offset)?,
+            v,
             r: list.val_at(offset + 1)?,
             s: list.val_at(offset + 2)?,
             hash,
@@ -190,13 +194,28 @@ impl SignedTransactionShared for UnverifiedEip2930Transaction {
 }
 
 impl UnverifiedEip2930Transaction {
+    pub fn new(unsigned: Eip2930Transaction, r: U256, s: U256, v: u64, hash: H256) -> Result<Self, Error> {
+        if !Self::validate_v(v) {
+            return Err(Error::InvalidSignature("invalid sig v".into()));
+        }
+        Ok(UnverifiedEip2930Transaction {
+            unsigned,
+            r,
+            s,
+            v,
+            hash,
+        })
+    }
+
+    fn validate_v(v: u64) -> bool { (0..=1).contains(&v) }
+
     /// tx list item count
-    fn payload_length(&self) -> usize { self.unsigned.payload_length() + 3 }
+    fn payload_size(&self) -> usize { self.unsigned.payload_size() + 3 }
 
     /// Append object with a signature into RLP stream
     pub(crate) fn rlp_append_sealed_transaction(&self, s: &mut RlpStream) {
         s.append(&(TxType::Type1 as u8));
-        s.begin_list(self.payload_length());
+        s.begin_list(self.payload_size());
         s.append(&self.chain_id);
         s.append(&self.nonce);
         s.append(&self.gas_price);
@@ -211,7 +230,11 @@ impl UnverifiedEip2930Transaction {
     }
 
     pub fn standard_v(&self) -> u8 {
-        self.v.try_into().unwrap_or_default() // we should have parity 0 or 1  for v2 txns
+        self.v.try_into().expect("parity 0 or 1") // ensured that parity is 0 or 1 for tx type 1
     }
 
+    pub fn r(&self) -> U256 { self.r }
+    pub fn s(&self) -> U256 { self.s }
+    pub fn v(&self) -> u64 { self.v }
+    pub fn hash(&self) -> H256 { self.hash }
 }

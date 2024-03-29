@@ -3,7 +3,7 @@
 //! Legacy transaction encoding/decoding and specific checks
 
 use super::{Action, Bytes, TransactionShared};
-use crate::SignedTransactionShared;
+use crate::{Error, SignedTransactionShared};
 use ethereum_types::{H256, U256};
 use hash::keccak;
 use rlp::{self, DecoderError, Rlp, RlpStream};
@@ -29,7 +29,7 @@ pub struct LegacyTransaction {
 
 impl LegacyTransaction {
     /// tx list item count
-    fn payload_length(chain_id: Option<u64>) -> usize {
+    fn payload_size(chain_id: Option<u64>) -> usize {
         if chain_id.is_none() {
             6
         } else {
@@ -39,7 +39,7 @@ impl LegacyTransaction {
 
     /// Append object with a without signature into RLP stream
     fn rlp_append_unsigned_transaction(&self, s: &mut RlpStream, chain_id: Option<u64>) {
-        s.begin_list(Self::payload_length(chain_id));
+        s.begin_list(Self::payload_size(chain_id));
         s.append(&self.nonce);
         s.append(&self.gas_price);
         s.append(&self.gas);
@@ -84,17 +84,17 @@ impl rlp::Decodable for LegacyTransaction {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct UnverifiedLegacyTransaction {
     /// Plain Transaction.
-    pub unsigned: LegacyTransaction,
+    unsigned: LegacyTransaction,
     /// The V field of the signature; the LS bit described which half of the curve our point falls
     /// in. The MS bits describe which chain this transaction is for. If 27/28, its for all chains.
     /// normally fixed with chain_id for Eip155
-    pub network_v: u64,
+    network_v: u64,
     /// The R field of the signature; helps describe the point on the curve.
-    pub r: U256,
+    r: U256,
     /// The S field of the signature; helps describe the point on the curve.
-    pub s: U256,
+    s: U256,
     /// Hash of the transaction
-    pub hash: H256,
+    hash: H256,
 }
 
 impl Deref for UnverifiedLegacyTransaction {
@@ -128,6 +128,23 @@ impl SignedTransactionShared for UnverifiedLegacyTransaction {
 }
 
 impl UnverifiedLegacyTransaction {
+    pub fn new(
+        unsigned: LegacyTransaction,
+        r: U256,
+        s: U256,
+        v: u64,
+        chain_id: Option<u64>,
+        hash: H256,
+    ) -> Result<Self, Error> {
+        Ok(UnverifiedLegacyTransaction {
+            unsigned,
+            r,
+            s,
+            network_v: Self::to_network_v(v, chain_id),
+            hash,
+        })
+    }
+
     /// Append object with a signature into RLP stream
     pub(crate) fn rlp_append_sealed_transaction(&self, s: &mut RlpStream) {
         s.begin_list(9);
@@ -144,9 +161,12 @@ impl UnverifiedLegacyTransaction {
 
     pub fn standard_v(&self) -> u8 { eip155_methods::check_replay_protection(self.network_v) }
 
-    pub fn to_network_v(v: u64, chain_id: Option<u64>) -> u64 {
-        eip155_methods::add_chain_replay_protection(v, chain_id)
-    }
+    fn to_network_v(v: u64, chain_id: Option<u64>) -> u64 { eip155_methods::add_chain_replay_protection(v, chain_id) }
+
+    pub fn r(&self) -> U256 { self.r }
+    pub fn s(&self) -> U256 { self.s }
+    pub fn v(&self) -> u64 { self.network_v }
+    pub fn hash(&self) -> H256 { self.hash }
 }
 
 /// Replay protection logic for v part of transaction's signature

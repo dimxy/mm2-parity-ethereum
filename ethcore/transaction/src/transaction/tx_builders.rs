@@ -107,9 +107,7 @@ impl TransactionWrapperBuilder {
                 chain_id: self.chain_id.ok_or(TxBuilderError::NoChainIdSet)?,
                 nonce: self.nonce,
                 max_fee_per_gas: self.max_fee_per_gas.ok_or(TxBuilderError::NoFeePerGasSet)?,
-                max_priority_fee_per_gas: self
-                    .max_priority_fee_per_gas
-                    .ok_or(TxBuilderError::NoFeePerGasSet)?,
+                max_priority_fee_per_gas: self.max_priority_fee_per_gas.ok_or(TxBuilderError::NoFeePerGasSet)?,
                 gas: self.gas,
                 action: self.action,
                 value: self.value,

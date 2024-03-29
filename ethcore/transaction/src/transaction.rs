@@ -18,7 +18,7 @@
 
 //! Transaction data structure.
 
-use crate::error;
+use crate::{error, Error};
 use ethereum_types::{Address, H160, H256, U256};
 use ethkey::{self, public_to_address, recover, Public, Secret, Signature};
 use hash::keccak;
@@ -153,29 +153,29 @@ impl TransactionWrapper {
     }
 
     /// Signs the transaction as coming from `sender`.
-    pub fn sign(self, secret: &Secret, chain_id: Option<u64>) -> SignedTransaction {
-        let sig = ::ethkey::sign(secret, &self.message_hash(chain_id))
-            .expect("data is valid and context has signing capabilities; qed");
-        SignedTransaction::new(self.with_signature(sig, chain_id)).expect("secret is valid so it's recoverable")
+    pub fn sign(self, secret: &Secret, chain_id: Option<u64>) -> Result<SignedTransaction, Error> {
+        let sig = ::ethkey::sign(secret, &self.message_hash(chain_id))?;
+        Ok(SignedTransaction::new(self.with_signature(sig, chain_id)?)?)
     }
 
     /// Add signature to the transaction.
-    fn with_signature(self, sig: Signature, chain_id: Option<u64>) -> UnverifiedTransactionWrapper {
-        UnverifiedTransactionWrapper::new(
+    fn with_signature(self, sig: Signature, chain_id: Option<u64>) -> Result<UnverifiedTransactionWrapper, Error> {
+        Ok(UnverifiedTransactionWrapper::new(
             self,
             sig.r().into(),
             sig.s().into(),
             sig.v() as u64,
             chain_id,
             H256::from_low_u64_ne(0),
-        )
-        .compute_hash()
+        )?
+        .compute_hash())
     }
 
     /// Useful for test incorrectly signed transactions.
     #[cfg(test)]
     pub fn invalid_sign(self) -> UnverifiedTransactionWrapper {
         UnverifiedTransactionWrapper::new(self, U256::one(), U256::one(), 0, None, H256::from_low_u64_ne(0))
+            .unwrap()
             .compute_hash()
     }
 
@@ -190,6 +190,7 @@ impl TransactionWrapper {
                 None,
                 H256::from_low_u64_ne(0),
             )
+            .unwrap()
             .compute_hash(),
             sender: from,
             public: None,
@@ -226,33 +227,17 @@ impl rlp::Decodable for UnverifiedTransactionWrapper {
 }
 
 impl UnverifiedTransactionWrapper {
-    fn new(tx: TransactionWrapper, r: U256, s: U256, v: u64, chain_id: Option<u64>, hash: H256) -> Self {
+    fn new(tx: TransactionWrapper, r: U256, s: U256, v: u64, chain_id: Option<u64>, hash: H256) -> Result<Self, Error> {
         match tx {
-            TransactionWrapper::Legacy(unsigned) => UnverifiedTransactionWrapper::Legacy(UnverifiedLegacyTransaction {
-                unsigned,
-                r,
-                s,
-                network_v: UnverifiedLegacyTransaction::to_network_v(v, chain_id),
-                hash,
-            }),
-            TransactionWrapper::Eip2930(unsigned) => {
-                UnverifiedTransactionWrapper::Eip2930(UnverifiedEip2930Transaction {
-                    unsigned,
-                    r,
-                    s,
-                    v,
-                    hash,
-                })
-            },
-            TransactionWrapper::Eip1559(unsigned) => {
-                UnverifiedTransactionWrapper::Eip1559(UnverifiedEip1559Transaction {
-                    unsigned,
-                    r,
-                    s,
-                    v,
-                    hash,
-                })
-            },
+            TransactionWrapper::Legacy(unsigned) => Ok(UnverifiedTransactionWrapper::Legacy(
+                UnverifiedLegacyTransaction::new(unsigned, r, s, v, chain_id, hash)?,
+            )),
+            TransactionWrapper::Eip2930(unsigned) => Ok(UnverifiedTransactionWrapper::Eip2930(
+                UnverifiedEip2930Transaction::new(unsigned, r, s, v, hash)?,
+            )),
+            TransactionWrapper::Eip1559(unsigned) => Ok(UnverifiedTransactionWrapper::Eip1559(
+                UnverifiedEip1559Transaction::new(unsigned, r, s, v, hash)?,
+            )),
         }
     }
 
@@ -275,9 +260,9 @@ impl UnverifiedTransactionWrapper {
 
     pub fn unsigned(&self) -> &TransactionSharedRet {
         match self {
-            UnverifiedTransactionWrapper::Legacy(tx) => &tx.unsigned as &TransactionSharedRet,
-            UnverifiedTransactionWrapper::Eip2930(tx) => &tx.unsigned as &TransactionSharedRet,
-            UnverifiedTransactionWrapper::Eip1559(tx) => &tx.unsigned as &TransactionSharedRet,
+            UnverifiedTransactionWrapper::Legacy(tx) => tx.deref() as &TransactionSharedRet,
+            UnverifiedTransactionWrapper::Eip2930(tx) => tx.deref() as &TransactionSharedRet,
+            UnverifiedTransactionWrapper::Eip1559(tx) => tx.deref() as &TransactionSharedRet,
         }
     }
 
@@ -320,10 +305,7 @@ impl UnverifiedTransactionWrapper {
 
     /// Recovers the public key of the sender.
     pub fn recover_public(&self) -> Result<Public, ethkey::Error> {
-        recover(
-            &self.signature(),
-            &self.unsigned().message_hash(self.chain_id_from_v()),
-        )
+        recover(&self.signature(), &self.unsigned().message_hash(self.chain_id_from_v()))
     }
 
     /// Do basic validation, checking for valid signature and minimum gas,
@@ -386,32 +368,32 @@ impl UnverifiedTransactionWrapper {
 
     fn r(&self) -> U256 {
         match self {
-            UnverifiedTransactionWrapper::Legacy(tx) => tx.r,
-            UnverifiedTransactionWrapper::Eip2930(tx) => tx.r,
-            UnverifiedTransactionWrapper::Eip1559(tx) => tx.r,
+            UnverifiedTransactionWrapper::Legacy(tx) => tx.r(),
+            UnverifiedTransactionWrapper::Eip2930(tx) => tx.r(),
+            UnverifiedTransactionWrapper::Eip1559(tx) => tx.r(),
         }
     }
     fn s(&self) -> U256 {
         match self {
-            UnverifiedTransactionWrapper::Legacy(tx) => tx.s,
-            UnverifiedTransactionWrapper::Eip2930(tx) => tx.s,
-            UnverifiedTransactionWrapper::Eip1559(tx) => tx.s,
+            UnverifiedTransactionWrapper::Legacy(tx) => tx.s(),
+            UnverifiedTransactionWrapper::Eip2930(tx) => tx.s(),
+            UnverifiedTransactionWrapper::Eip1559(tx) => tx.s(),
         }
     }
     fn v(&self) -> u64 {
         match self {
-            UnverifiedTransactionWrapper::Legacy(tx) => tx.network_v,
-            UnverifiedTransactionWrapper::Eip2930(tx) => tx.v,
-            UnverifiedTransactionWrapper::Eip1559(tx) => tx.v,
+            UnverifiedTransactionWrapper::Legacy(tx) => tx.v(),
+            UnverifiedTransactionWrapper::Eip2930(tx) => tx.v(),
+            UnverifiedTransactionWrapper::Eip1559(tx) => tx.v(),
         }
     }
 
     /// Get the hash of this transaction (keccak of the RLP).
     pub fn tx_hash(&self) -> H256 {
         match self {
-            UnverifiedTransactionWrapper::Legacy(tx) => tx.hash,
-            UnverifiedTransactionWrapper::Eip2930(tx) => tx.hash,
-            UnverifiedTransactionWrapper::Eip1559(tx) => tx.hash,
+            UnverifiedTransactionWrapper::Legacy(tx) => tx.hash(),
+            UnverifiedTransactionWrapper::Eip2930(tx) => tx.hash(),
+            UnverifiedTransactionWrapper::Eip1559(tx) => tx.hash(),
         }
     }
 }
@@ -459,9 +441,9 @@ impl SignedTransaction {
 
     pub fn unsigned(&self) -> &TransactionSharedRet {
         match &self.transaction {
-            UnverifiedTransactionWrapper::Legacy(tx) => &tx.unsigned as &TransactionSharedRet,
-            UnverifiedTransactionWrapper::Eip2930(tx) => &tx.unsigned as &TransactionSharedRet,
-            UnverifiedTransactionWrapper::Eip1559(tx) => &tx.unsigned as &TransactionSharedRet,
+            UnverifiedTransactionWrapper::Legacy(tx) => tx.deref() as &TransactionSharedRet,
+            UnverifiedTransactionWrapper::Eip2930(tx) => tx.deref() as &TransactionSharedRet,
+            UnverifiedTransactionWrapper::Eip1559(tx) => tx.deref() as &TransactionSharedRet,
         }
     }
 
@@ -610,7 +592,8 @@ mod tests {
             value: U256::from(1),
             data: b"Hello!".to_vec(),
         })
-        .sign(&key.secret(), None);
+        .sign(&key.secret(), None)
+        .expect("sign transaction okay");
         assert_eq!(Address::from(keccak(key.public())), t.sender());
         assert_eq!(t.chain_id_from_v(), None);
     }
@@ -649,7 +632,8 @@ mod tests {
             value: U256::from(1),
             data: b"Hello!".to_vec(),
         })
-        .sign(&key.secret(), Some(69));
+        .sign(&key.secret(), Some(69))
+        .expect("sign transaction okay");
         assert_eq!(Address::from(keccak(key.public())), t.sender());
         assert_eq!(t.chain_id_from_v(), Some(69));
     }
@@ -660,7 +644,7 @@ mod tests {
 
         let test_vector = |tx_data: &str, address: &'static str| {
             let bytes: Vec<u8> = FromHex::from_hex(tx_data).unwrap();
-            let signed = rlp::decode(&bytes).expect("decoding tx data failed");
+            let signed = rlp::decode(&bytes).expect("decoding tx data valid");
             let signed = SignedTransaction::new(signed).unwrap();
 
             let expected = Address::from_str(address).unwrap();
