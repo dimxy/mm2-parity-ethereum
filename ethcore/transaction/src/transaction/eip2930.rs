@@ -70,21 +70,21 @@ impl rlp::Encodable for AccessList {
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Eip2930Transaction {
     /// Simple replay attack protection
-    pub chain_id: u64,
+    pub(crate) chain_id: u64,
     /// Nonce.
-    pub nonce: U256,
+    pub(crate) nonce: U256,
     /// Gas price.
-    pub gas_price: U256,
+    pub(crate) gas_price: U256,
     /// Gas paid up front for transaction execution.
-    pub gas: U256,
+    pub(crate) gas: U256,
     /// Action, can be either call or contract create.
-    pub action: Action,
+    pub(crate) action: Action,
     /// Transfered value.
-    pub value: U256,
+    pub(crate) value: U256,
     /// Transaction data.
-    pub data: Bytes,
+    pub(crate) data: Bytes,
     /// Access list.
-    pub access_list: AccessList,
+    pub(crate) access_list: AccessList,
 }
 
 impl Eip2930Transaction {

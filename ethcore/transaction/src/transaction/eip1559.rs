@@ -16,23 +16,23 @@ use std::{convert::TryInto, ops::Deref};
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Eip1559Transaction {
     /// Simple replay attack protection
-    pub chain_id: u64,
+    pub(crate) chain_id: u64,
     /// Nonce.
-    pub nonce: U256,
+    pub(crate) nonce: U256,
     /// Max fee per gas.
-    pub max_fee_per_gas: U256,
+    pub(crate) max_fee_per_gas: U256,
     /// Max priority fee per gas.
-    pub max_priority_fee_per_gas: U256,
+    pub(crate) max_priority_fee_per_gas: U256,
     /// Gas paid up front for transaction execution.
-    pub gas: U256,
+    pub(crate) gas: U256,
     /// Action, can be either call or contract create.
-    pub action: Action,
+    pub(crate) action: Action,
     /// Transfered value.
-    pub value: U256,
+    pub(crate) value: U256,
     /// Transaction data.
-    pub data: Bytes,
+    pub(crate) data: Bytes,
     /// Access list.
-    pub access_list: AccessList,
+    pub(crate) access_list: AccessList,
 }
 
 impl Eip1559Transaction {

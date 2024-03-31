@@ -37,7 +37,7 @@ pub use self::eip1559::{Eip1559Transaction, UnverifiedEip1559Transaction};
 type BlockNumber = u64;
 type Bytes = Vec<u8>;
 
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 pub enum TxType {
     Legacy,
     Type1 = 1,
@@ -227,7 +227,7 @@ impl rlp::Decodable for UnverifiedTransactionWrapper {
 }
 
 impl UnverifiedTransactionWrapper {
-    /// Creates new UnverifiedTransactionWrapper from TransactionWrapper and signature params. 
+    /// Creates new UnverifiedTransactionWrapper from TransactionWrapper and signature params.
     /// For Legacy transactions param v must be not modified for replay protection with chain_id.
     /// Internally used.
     fn new(tx: TransactionWrapper, r: U256, s: U256, v: u64, chain_id: Option<u64>, hash: H256) -> Result<Self, Error> {
