@@ -57,9 +57,9 @@ impl error::Error for Error {
 	}
 }
 
-impl Into<String> for Error {
-	fn into(self) -> String {
-		format!("{}", self)
+impl From<Error> for String {
+	fn from(err: Error) -> String {
+		format!("{}", err)
 	}
 }
 

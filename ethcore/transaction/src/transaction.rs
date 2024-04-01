@@ -595,7 +595,7 @@ mod tests {
             value: U256::from(1),
             data: b"Hello!".to_vec(),
         })
-        .sign(&key.secret(), None)
+        .sign(key.secret(), None)
         .expect("sign transaction okay");
         assert_eq!(Address::from(keccak(key.public())), t.sender());
         assert_eq!(t.chain_id_from_v(), None);
@@ -615,7 +615,6 @@ mod tests {
         assert_eq!(Address::from_low_u64_ne(0x69), t.sender());
         assert_eq!(t.chain_id_from_v(), None);
 
-        let t = t.clone();
         assert_eq!(Address::from_low_u64_ne(0x69), t.sender());
         assert_eq!(t.chain_id_from_v(), None);
     }
@@ -635,7 +634,7 @@ mod tests {
             value: U256::from(1),
             data: b"Hello!".to_vec(),
         })
-        .sign(&key.secret(), Some(69))
+        .sign(key.secret(), Some(69))
         .expect("sign transaction okay");
         assert_eq!(Address::from(keccak(key.public())), t.sender());
         assert_eq!(t.chain_id_from_v(), Some(69));

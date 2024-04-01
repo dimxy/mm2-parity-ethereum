@@ -25,8 +25,8 @@ pub struct Prefix {
 impl Prefix {
 	pub fn new(prefix: Vec<u8>, iterations: usize) -> Self {
 		Prefix {
-			prefix: prefix,
-			iterations: iterations,
+			prefix,
+			iterations,
 		}
 	}
 }
