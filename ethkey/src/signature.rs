@@ -96,7 +96,7 @@ impl Signature {
 // remove when integer generics exist
 impl PartialEq for Signature {
 	fn eq(&self, other: &Self) -> bool {
-		&self.0[..] == &other.0[..]
+		self.0[..] == other.0[..]
 	}
 }
 
@@ -159,9 +159,9 @@ impl From<[u8; 65]> for Signature {
 	}
 }
 
-impl Into<[u8; 65]> for Signature {
-	fn into(self) -> [u8; 65] {
-		self.0
+impl From<Signature> for [u8; 65] {
+	fn from(val: Signature) -> Self {
+		val.0
 	}
 }
 

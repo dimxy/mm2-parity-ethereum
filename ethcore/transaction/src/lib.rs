@@ -20,8 +20,8 @@ extern crate ethereum_types;
 extern crate ethkey;
 extern crate keccak_hash as hash;
 extern crate rlp;
-extern crate unexpected;
 extern crate rustc_hex;
+extern crate unexpected;
 
 mod error;
 mod transaction;
