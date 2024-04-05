@@ -57,12 +57,6 @@ impl error::Error for Error {
 	}
 }
 
-impl From<Error> for String {
-	fn from(err: Error) -> String {
-		format!("{}", err)
-	}
-}
-
 impl From<::secp256k1::Error> for Error {
 	fn from(e: ::secp256k1::Error) -> Error {
 		match e {
