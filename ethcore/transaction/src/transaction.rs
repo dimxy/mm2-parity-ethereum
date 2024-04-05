@@ -39,9 +39,13 @@ type Bytes = Vec<u8>;
 
 #[derive(Clone, PartialEq)]
 pub enum TxType {
+    /// Legacy non-typed transaction
     Legacy,
+    /// Transaction with EIP-2718 type field set to 1 according to EIP-2930
     Type1 = 1,
+    /// Transaction with EIP-2718 type field set to 2 according to EIP-1559
     Type2 = 2,
+    /// Indicates we could not parse transaction type correctly
     Invalid,
 }
 
