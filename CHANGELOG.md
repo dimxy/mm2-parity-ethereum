@@ -1,6 +1,15 @@
-## Parity-Ethereum [v2.0.1](https://github.com/paritytech/parity-ethereum/releases/tag/v2.0.1) (2018-07-27)
 
-Parity-Ethereum 2.0.1-beta is a bug-fix release to improve performance and stability.
+## MM2-Parity-Ethereum 2.1.0-beta: added support for typed transactions (2024-04-05)
+- Added support for [EIP-2930](https://eips.ethereum.org/EIPS/eip-2930) type 1 transaction with optional access lists and [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) type 2 transaction with max fee per gas and max priority fee per gas option.
+
+## MM2-Parity-Ethereum 2.0.2-beta lib created by forking
+
+In 2018 the Parity-Ethereum repository was forked at [e2095d4](https://github.com/openethereum/parity-ethereum/commit/e2095d4a5d5749ee26828f65c80e509e024b9535) to create KomodoPlatform _MM2-Parity-Ethereum_ library.
+- Code was stripped to create a library for Komodo DeFi framework (MM2) API.
+- fixed keccak and libsec256k1 dependency libs 
+
+
+## Parity-Ethereum 2.0.1-beta is a bug-fix release to improve performance and stability.
 
 Note, authorities in PoA networks based on the Aura engine, should upgrade their nodes to 1.11.8-stable or 2.0.1-beta as this release includes a critical fix.
 
