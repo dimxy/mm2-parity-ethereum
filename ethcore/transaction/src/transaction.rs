@@ -175,6 +175,14 @@ impl TransactionWrapper {
         .compute_hash())
     }
 
+    pub fn shared(&self) -> &TransactionSharedRet {
+        match self {
+            TransactionWrapper::Legacy(tx) => tx as &TransactionSharedRet,
+            TransactionWrapper::Eip2930(tx) => tx as &TransactionSharedRet,
+            TransactionWrapper::Eip1559(tx) => tx as &TransactionSharedRet,
+        }
+    }
+
     /// Useful for test incorrectly signed transactions.
     #[cfg(test)]
     pub fn invalid_sign(self) -> UnverifiedTransactionWrapper {
