@@ -27,7 +27,7 @@ use std::ops::Deref;
 
 mod legacy;
 pub mod tx_builders;
-pub use self::legacy::{LegacyTransaction, UnverifiedLegacyTransaction};
+pub use self::legacy::{LegacyTransaction, UnverifiedLegacyTransaction, eip155_methods};
 pub use self::tx_builders::TransactionWrapperBuilder;
 mod eip2930;
 pub use self::eip2930::{AccessList, AccessListItem, Eip2930Transaction, UnverifiedEip2930Transaction};
@@ -163,7 +163,7 @@ impl TransactionWrapper {
     }
 
     /// Add signature to the transaction.
-    fn with_signature(self, sig: Signature, chain_id: Option<u64>) -> Result<UnverifiedTransactionWrapper, Error> {
+    pub fn with_signature(self, sig: Signature, chain_id: Option<u64>) -> Result<UnverifiedTransactionWrapper, Error> {
         Ok(UnverifiedTransactionWrapper::new(
             self,
             sig.r().into(),
