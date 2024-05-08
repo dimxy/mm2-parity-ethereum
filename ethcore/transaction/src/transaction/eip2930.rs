@@ -105,6 +105,8 @@ impl Eip2930Transaction {
     }
 
     pub fn gas_price(&self) -> U256 { self.gas_price }
+
+    pub fn access_list(&self) -> &AccessList { &self.access_list }
 }
 
 impl TransactionShared for Eip2930Transaction {

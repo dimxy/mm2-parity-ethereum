@@ -56,6 +56,8 @@ impl Eip1559Transaction {
     pub fn max_fee_per_gas(&self) -> U256 { self.max_fee_per_gas }
 
     pub fn max_priority_fee_per_gas(&self) -> U256 { self.max_priority_fee_per_gas }
+
+    pub fn access_list(&self) -> &AccessList { &self.access_list }
 }
 
 impl TransactionShared for Eip1559Transaction {
