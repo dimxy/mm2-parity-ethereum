@@ -52,12 +52,15 @@ impl LegacyTransaction {
             s.append(&0u8);
         }
     }
+
+    pub fn gas_price(&self) -> U256 { self.gas_price }
 }
 
 impl TransactionShared for LegacyTransaction {
     fn nonce(&self) -> U256 { self.nonce }
     fn action(&self) -> &Action { &self.action }
     fn value(&self) -> U256 { self.value }
+    fn gas(&self) -> U256 { self.gas }
     fn data(&self) -> &Bytes { &self.data }
     /// The message hash of the transaction.
     fn message_hash(&self, chain_id: Option<u64>) -> H256 {

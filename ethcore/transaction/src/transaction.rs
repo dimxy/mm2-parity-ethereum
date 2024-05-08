@@ -120,6 +120,8 @@ pub trait TransactionShared {
 
     fn value(&self) -> U256;
 
+    fn gas(&self) -> U256;
+
     fn data(&self) -> &Bytes;
 
     fn message_hash(&self, chain_id: Option<u64>) -> H256;

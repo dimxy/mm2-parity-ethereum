@@ -52,12 +52,17 @@ impl Eip1559Transaction {
         s.append(&self.data);
         s.append(&self.access_list);
     }
+
+    pub fn max_fee_per_gas(&self) -> U256 { self.max_fee_per_gas }
+
+    pub fn max_priority_fee_per_gas(&self) -> U256 { self.max_priority_fee_per_gas }
 }
 
 impl TransactionShared for Eip1559Transaction {
     fn nonce(&self) -> U256 { self.nonce }
     fn action(&self) -> &Action { &self.action }
     fn value(&self) -> U256 { self.value }
+    fn gas(&self) -> U256 { self.gas }
     fn data(&self) -> &Bytes { &self.data }
     /// The message hash of the transaction.
     fn message_hash(&self, _chain_id: Option<u64>) -> H256 {
