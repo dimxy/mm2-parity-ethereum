@@ -1,4 +1,7 @@
 
+## MM2-Parity-Ethereum 2.1.1-beta: export transaction properties (2024-05-09)
+Add methods to expose transaction properties
+
 ## MM2-Parity-Ethereum 2.1.0-beta: added support for typed transactions (2024-04-05)
 - Added support for [EIP-2930](https://eips.ethereum.org/EIPS/eip-2930) type 1 transaction with optional access lists and [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) type 2 transaction with max fee per gas and max priority fee per gas option.
 
